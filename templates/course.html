@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ course.title }} — Cyber Academy</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+         background: #0b0d12; color: #e8eaed; line-height: 1.6; }
+  nav { display: flex; justify-content: space-between; align-items: center;
+        padding: 18px 40px; border-bottom: 1px solid #1e222b; }
+  .logo { font-weight: 700; font-size: 20px; }
+  .logo span { color: #5b8cff; }
+  nav a { color: #9aa3b2; text-decoration: none; font-size: 15px; }
+  nav a:hover { color: #fff; }
+
+  header.course {
+    padding: 60px 40px 46px;
+    background: radial-gradient(600px 260px at 20% 0%, rgba(91,140,255,.16), transparent 70%);
+    border-bottom: 1px solid #1e222b;
+  }
+  .wrap { max-width: 860px; margin: 0 auto; }
+  .icon { font-size: 40px; margin-bottom: 14px; }
+  .level { display: inline-block; font-size: 12px; padding: 4px 12px;
+           border-radius: 999px; background: #1a2033; color: #7ba0ff; margin-bottom: 16px; }
+  header.course h1 { font-size: 40px; letter-spacing: -1px; margin-bottom: 10px; }
+  header.course p { color: #9aa3b2; font-size: 18px; }
+
+  main { max-width: 860px; margin: 0 auto; padding: 46px 40px 90px; }
+  h2 { font-size: 22px; margin-bottom: 22px; }
+  ol { list-style: none; counter-reset: n; }
+  li { counter-increment: n; display: flex; align-items: center; gap: 18px;
+       background: #141821; border: 1px solid #1e222b; border-radius: 11px;
+       padding: 18px 22px; margin-bottom: 12px; transition: border-color .2s; }
+  li:hover { border-color: #33405c; }
+  li::before { content: counter(n); flex: 0 0 34px; height: 34px;
+      display: grid; place-items: center; border-radius: 50%;
+      background: #1a2033; color: #7ba0ff; font-size: 14px; font-weight: 600; }
+  .len { margin-left: auto; color: #6b7484; font-size: 13px; }
+  .back { display: inline-block; margin-bottom: 26px; color: #5b8cff;
+          text-decoration: none; font-size: 15px; }
+  .back:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">Cyber<span>Academy</span></div>
+  <a href="/">All courses</a>
+</nav>
+
+<header class="course">
+  <div class="wrap">
+    <div class="icon">{{ course.icon }}</div>
+    <div class="level">{{ course.level }}</div>
+    <h1>{{ course.title }}</h1>
+    <p>{{ course.tagline }}</p>
+  </div>
+</header>
+
+<main>
+  <a class="back" href="/">&larr; Back to courses</a>
+  <h2>Curriculum &middot; {{ course.lessons|length }} lessons</h2>
+  <ol>
+    {% for lesson in course.lessons %}
+    <li>{{ lesson }}<span class="len">20 min</span></li>
+    {% endfor %}
+  </ol>
+</main>
+
+</body>
+</html>

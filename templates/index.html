@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Cyber Academy</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 760px; margin: 40px auto; padding: 0 20px; background: #0f1115; color: #e6e6e6; }
+    h1 { border-bottom: 1px solid #333; padding-bottom: 12px; }
+    .card { background: #181b22; padding: 20px; border-radius: 8px; margin-bottom: 16px; }
+    a { color: #6ea8fe; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .tagline { color: #9aa0a6; margin: 6px 0 0; }
+  </style>
+</head>
+<body>
+  <h1>Cyber Academy</h1>
+  <p class="tagline">Security training: offensive, defensive, and AI.</p>
+
+  {% for course in courses %}
+  <div class="card">
+    <h2><a href="/course/{{ course.id }}">{{ course.title }}</a></h2>
+    <p class="tagline">{{ course.tagline }}</p>
+    <p>{{ course.lessons|length }} lessons</p>
+  </div>
+  {% endfor %}
+</body>
+</html>
