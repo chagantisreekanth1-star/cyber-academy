@@ -64,6 +64,22 @@ COURSES = [
             "Container and Kubernetes security basics",
         ],
     },
+    {
+        "id": "edr",
+        "title": "Endpoint Detection & Response",
+        "tagline": "Detect, investigate, and respond to threats on the endpoint.",
+        "icon": "🖥️",
+        "level": "Intermediate",
+        "progress": 0,
+        "lessons": [
+            "EDR architecture: sensors, telemetry, and cloud analytics",
+            "Process, file, and network activity monitoring",
+            "Behavioral detection vs. signature-based detection",
+            "Triage and investigation of endpoint alerts",
+            "Isolating and remediating compromised hosts",
+            "Building detection rules from MITRE ATT&CK techniques",
+        ],
+    },
 ]
 
 
