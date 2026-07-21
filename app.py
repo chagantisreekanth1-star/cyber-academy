@@ -7,33 +7,45 @@ COURSES = [
         "id": "offensive",
         "title": "Offensive Security",
         "tagline": "Think like an attacker to defend better.",
+        "icon": "🎯",
+        "level": "Intermediate",
+        "progress": 35,
         "lessons": [
             "Reconnaissance and OSINT fundamentals",
             "Web application vulnerability classes (OWASP Top 10)",
-            "Network scanning concepts",
+            "Network scanning and enumeration concepts",
+            "Authentication and session weaknesses",
             "Reporting and responsible disclosure",
         ],
     },
     {
         "id": "defensive",
         "title": "Defensive Security",
-        "tagline": "Detect, respond, and harden.",
+        "tagline": "Detect, respond, and harden systems.",
+        "icon": "🛡️",
+        "level": "Beginner",
+        "progress": 60,
         "lessons": [
             "Log analysis and SIEM basics",
-            "Incident response lifecycle",
+            "The incident response lifecycle",
             "Threat hunting fundamentals",
             "Hardening and secure configuration",
+            "Detection engineering basics",
         ],
     },
     {
         "id": "ai-security",
         "title": "AI & LLM Security",
         "tagline": "Securing machine learning systems.",
+        "icon": "🤖",
+        "level": "Advanced",
+        "progress": 10,
         "lessons": [
-            "Prompt injection and why it happens",
+            "Prompt injection: why it happens",
             "Data poisoning and model supply chain risk",
             "Output handling and sandboxing",
             "AI red teaming methodology",
+            "Guardrails and evaluation",
         ],
     },
 ]
@@ -41,7 +53,8 @@ COURSES = [
 
 @app.route("/")
 def home():
-    return render_template("index.html", courses=COURSES)
+    total = sum(len(c["lessons"]) for c in COURSES)
+    return render_template("index.html", courses=COURSES, total_lessons=total)
 
 
 @app.route("/course/<course_id>")
