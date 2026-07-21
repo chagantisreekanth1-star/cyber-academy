@@ -48,6 +48,22 @@ COURSES = [
             "Guardrails and evaluation",
         ],
     },
+    {
+        "id": "cloud-security",
+        "title": "Cloud Security",
+        "tagline": "Secure workloads across AWS, Azure, and GCP.",
+        "icon": "☁️",
+        "level": "Intermediate",
+        "progress": 0,
+        "lessons": [
+            "Shared responsibility model explained",
+            "Identity and access management fundamentals",
+            "Network controls: VPCs, security groups, and segmentation",
+            "Storage misconfiguration and data exposure",
+            "Logging, monitoring, and cloud-native detection",
+            "Container and Kubernetes security basics",
+        ],
+    },
 ]
 
 
