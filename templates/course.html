@@ -47,7 +47,12 @@
 
 <nav>
   <div class="logo">Cyber<span>Academy</span></div>
-  <a href="/">All courses</a>
+  <div>
+    <a href="/">All courses</a>
+    {% if current_user_name %}
+    <a href="{{ url_for('logout') }}" style="margin-left: 18px;">Log out ({{ current_user_name }})</a>
+    {% endif %}
+  </div>
 </nav>
 
 <header class="course">

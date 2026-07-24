@@ -57,13 +57,31 @@
   .no-results { color: #6b7484; padding: 30px 0; display: none; }
   footer { border-top: 1px solid #1e222b; padding: 30px 40px; color: #6b7484;
     font-size: 14px; text-align: center; }
+  .flash { list-style: none; max-width: 1080px; margin: 16px auto 0; padding: 0 40px; }
+  .flash li { padding: 11px 14px; border-radius: 8px; font-size: 14px; margin-bottom: 8px; }
+  .flash li.error { background: #2a1418; color: #ff8f9c; border: 1px solid #4a1f27; }
+  .flash li.success { background: #10261c; color: #6fe3a0; border: 1px solid #1e4230; }
 </style>
 </head>
 <body>
 <nav>
   <div class="logo">Cyber<span>Academy</span></div>
-  <div><a href="/">Courses</a><a href="/">Labs</a><a href="/">About</a></div>
+  <div>
+    <a href="/">Courses</a><a href="/">Labs</a><a href="/">About</a>
+    {% if current_user_name %}
+    <a href="{{ url_for('logout') }}">Log out ({{ current_user_name }})</a>
+    {% endif %}
+  </div>
 </nav>
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+  <ul class="flash">
+    {% for category, message in messages %}
+    <li class="{{ category }}">{{ message }}</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+{% endwith %}
 <section class="hero">
   <div class="badge">SECURITY TRAINING PLATFORM</div>
   <h1>Learn to defend.<br>Learn to <em>think like an attacker</em>.</h1>
