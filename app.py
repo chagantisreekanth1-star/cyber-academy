@@ -1,13 +1,16 @@
 import os
 import sqlite3
 from functools import wraps
+from urllib.parse import urlparse
 
 from flask import Flask, abort, flash, g, redirect, render_template, request, session, url_for
+from flask_wtf import CSRFProtect
 from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
 from werkzeug.security import check_password_hash, generate_password_hash
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-change-me")
+csrf = CSRFProtect(app)
 
 DB_PATH = os.path.join(os.path.dirname(__file__), "users.db")
 RESET_SALT = "password-reset"
@@ -128,6 +131,13 @@ def init_db():
 init_db()
 
 
+def is_safe_next_url(target):
+    if not target:
+        return False
+    parsed = urlparse(target)
+    return not parsed.scheme and not parsed.netloc and parsed.path.startswith("/")
+
+
 def login_required(view):
     @wraps(view)
     def wrapped(*args, **kwargs):
@@ -186,7 +196,10 @@ def login():
             session["user_id"] = user["id"]
             session["user_name"] = user["name"]
             flash(f"Welcome back, {user['name']}!", "success")
-            return redirect(request.args.get("next") or url_for("home"))
+            next_url = request.args.get("next")
+            if is_safe_next_url(next_url):
+                return redirect(next_url)
+            return redirect(url_for("home"))
 
         flash("Invalid email or password.", "error")
 
@@ -266,4 +279,4 @@ def course(course_id):
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=os.environ.get("FLASK_DEBUG", "").lower() in ("1", "true", "yes"))
