@@ -34,6 +34,7 @@
   <div>
     <a href="{{ url_for('course', course_id=course.id) }}">{{ course.title }}</a>
     {% if current_user_name %}
+    <a href="{{ url_for('security') }}" style="margin-left: 18px;">Security</a>
     <a href="{{ url_for('logout') }}" style="margin-left: 18px;">Log out ({{ current_user_name }})</a>
     {% endif %}
   </div>
@@ -56,5 +57,19 @@
   </div>
 </main>
 
+<script>
+(function () {
+  var idleLimitMs = 5 * 60 * 1000; // keep in sync with IDLE_TIMEOUT_SECONDS in app.py
+  var timer;
+  function resetTimer() {
+    clearTimeout(timer);
+    timer = setTimeout(function () { window.location.href = "/logout"; }, idleLimitMs);
+  }
+  ["mousemove", "mousedown", "keydown", "scroll", "touchstart"].forEach(function (evt) {
+    document.addEventListener(evt, resetTimer, { passive: true });
+  });
+  resetTimer();
+})();
+</script>
 </body>
 </html>

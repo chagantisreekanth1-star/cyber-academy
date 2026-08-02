@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Forgot password — Cyber Academy</title>
+<title>Set up two-factor authentication — Cyber Academy</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -12,15 +12,23 @@
   nav { padding: 18px 40px; border-bottom: 1px solid #1e222b; }
   .logo { font-weight: 700; font-size: 20px; letter-spacing: -.3px; }
   .logo span { color: #5b8cff; }
+  nav a { color: #9aa3b2; text-decoration: none; margin-left: 26px; font-size: 15px; }
+  nav a:hover { color: #fff; }
   .wrap { flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px 20px; }
   .auth-card { width: 100%; max-width: 420px; background: #141821; border: 1px solid #1e222b;
     border-radius: 14px; padding: 34px 30px; }
   .auth-card h1 { font-size: 24px; letter-spacing: -.4px; margin-bottom: 6px; }
-  .auth-card .sub { color: #9aa3b2; font-size: 14px; margin-bottom: 26px; }
+  .auth-card .sub { color: #9aa3b2; font-size: 14px; margin-bottom: 22px; }
+  .qr { display: flex; justify-content: center; margin-bottom: 18px; }
+  .qr img { width: 200px; height: 200px; border-radius: 10px; background: #fff; padding: 10px; }
+  .secret { background: #0b0d12; border: 1px solid #1e222b; border-radius: 8px; padding: 11px 14px;
+    font-family: ui-monospace, SFMono-Regular, monospace; font-size: 14px; letter-spacing: 1px;
+    text-align: center; margin-bottom: 22px; word-break: break-all; color: #9aa3b2; }
   .field { margin-bottom: 16px; }
   .field label { display: block; font-size: 13px; color: #9aa3b2; margin-bottom: 6px; }
   .field input { width: 100%; padding: 11px 14px; background: #0b0d12; border: 1px solid #1e222b;
-    border-radius: 8px; color: #e8eaed; font-size: 15px; font-family: inherit; }
+    border-radius: 8px; color: #e8eaed; font-size: 22px; letter-spacing: 6px; text-align: center;
+    font-family: inherit; }
   .field input:focus { outline: none; border-color: #5b8cff; }
   .btn { width: 100%; background: #5b8cff; color: #fff; border: none; padding: 13px;
     border-radius: 8px; font-weight: 600; font-size: 15px; cursor: pointer;
@@ -33,18 +41,17 @@
   .flash li { padding: 11px 14px; border-radius: 8px; font-size: 14px; margin-bottom: 8px; }
   .flash li.error { background: #2a1418; color: #ff8f9c; border: 1px solid #4a1f27; }
   .flash li.success { background: #10261c; color: #6fe3a0; border: 1px solid #1e4230; }
-  .reset-link { margin-top: 6px; padding: 14px; background: #0b0d12; border: 1px dashed #2a3550;
-    border-radius: 8px; font-size: 13px; word-break: break-all; }
-  .reset-link a { color: #5b8cff; }
-  .note { font-size: 12px; color: #6b7484; margin-top: 10px; }
 </style>
 </head>
 <body>
-<nav><div class="logo">Cyber<span>Academy</span></div></nav>
+<nav>
+  <div class="logo">Cyber<span>Academy</span></div>
+  <div><a href="{{ url_for('security') }}">Security</a></div>
+</nav>
 <div class="wrap">
   <div class="auth-card">
-    <h1>Reset your password</h1>
-    <p class="sub">Enter the email on your account and we'll get you a reset link.</p>
+    <h1>Set up two-factor authentication</h1>
+    <p class="sub">Scan this QR code with an authenticator app (Google Authenticator, Authy, 1Password), then enter the code it shows.</p>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
@@ -56,23 +63,20 @@
       {% endif %}
     {% endwith %}
 
+    <div class="qr"><img src="{{ qr_data_uri }}" alt="QR code for authenticator app setup"></div>
+    <div class="secret">{{ secret }}</div>
+
     <form method="post">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <div class="field">
-        <label for="email">Email</label>
-        <input type="email" id="email" name="email" required autofocus>
+        <label for="code">Enter the 6-digit code</label>
+        <input type="text" id="code" name="code" inputmode="numeric" pattern="[0-9]*"
+               maxlength="6" autocomplete="one-time-code" required autofocus>
       </div>
-      <button class="btn" type="submit">Send reset link</button>
+      <button class="btn" type="submit">Enable two-factor authentication</button>
     </form>
 
-    {% if reset_link %}
-    <div class="reset-link">
-      <a href="{{ reset_link }}">{{ reset_link }}</a>
-      <p class="note">We couldn't send this by email right now, so here's the link directly. It expires in 1 hour.</p>
-    </div>
-    {% endif %}
-
-    <p class="foot"><a href="{{ url_for('login') }}">Back to log in</a></p>
+    <p class="foot"><a href="{{ url_for('security') }}">Cancel</a></p>
   </div>
 </div>
 </body>

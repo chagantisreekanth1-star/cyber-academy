@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Security settings — Cyber Academy</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+         background: #0b0d12; color: #e8eaed; line-height: 1.6;
+         min-height: 100vh; display: flex; flex-direction: column; }
+  nav { display: flex; justify-content: space-between; align-items: center;
+        padding: 18px 40px; border-bottom: 1px solid #1e222b; }
+  .logo { font-weight: 700; font-size: 20px; letter-spacing: -.3px; }
+  .logo span { color: #5b8cff; }
+  nav a { color: #9aa3b2; text-decoration: none; margin-left: 26px; font-size: 15px; }
+  nav a:hover { color: #fff; }
+  main { flex: 1; max-width: 560px; width: 100%; margin: 0 auto; padding: 50px 20px; }
+  h1 { font-size: 28px; letter-spacing: -.5px; margin-bottom: 8px; }
+  .sub { color: #9aa3b2; margin-bottom: 30px; }
+  .card { background: #141821; border: 1px solid #1e222b; border-radius: 14px; padding: 26px; }
+  .card h2 { font-size: 18px; margin-bottom: 6px; }
+  .card p { color: #9aa3b2; font-size: 14px; margin-bottom: 18px; }
+  .status { display: inline-flex; align-items: center; gap: 8px; font-size: 13px;
+    padding: 5px 12px; border-radius: 999px; margin-bottom: 18px; }
+  .status.on { background: #10261c; color: #6fe3a0; }
+  .status.off { background: #1a1e28; color: #9aa3b2; }
+  .btn { display: inline-block; background: #5b8cff; color: #fff; border: none; padding: 11px 22px;
+    border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; text-decoration: none;
+    transition: background .15s, transform .15s; }
+  .btn:hover { background: #4574e8; transform: translateY(-1px); }
+  .btn.danger { background: #3a1620; color: #ff8f9c; }
+  .btn.danger:hover { background: #4a1c28; }
+  .btn.secondary { background: transparent; border: 1px solid #1e222b; color: #e8eaed; }
+  .btn.secondary:hover { background: #1a1e28; }
+  .options { display: flex; gap: 12px; flex-wrap: wrap; }
+  .field { margin: 16px 0; }
+  .field label { display: block; font-size: 13px; color: #9aa3b2; margin-bottom: 6px; }
+  .field input { width: 100%; padding: 11px 14px; background: #0b0d12; border: 1px solid #1e222b;
+    border-radius: 8px; color: #e8eaed; font-size: 15px; font-family: inherit; }
+  .field input:focus { outline: none; border-color: #5b8cff; }
+  .flash { list-style: none; margin-bottom: 20px; }
+  .flash li { padding: 11px 14px; border-radius: 8px; font-size: 14px; margin-bottom: 8px; }
+  .flash li.error { background: #2a1418; color: #ff8f9c; border: 1px solid #4a1f27; }
+  .flash li.success { background: #10261c; color: #6fe3a0; border: 1px solid #1e4230; }
+</style>
+</head>
+<body>
+<nav>
+  <div class="logo">Cyber<span>Academy</span></div>
+  <div>
+    <a href="{{ url_for('home') }}">Courses</a>
+    <a href="{{ url_for('logout') }}">Log out ({{ current_user_name }})</a>
+  </div>
+</nav>
+<main>
+  <h1>Security</h1>
+  <p class="sub">Manage two-factor authentication for your account.</p>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <ul class="flash">
+      {% for category, message in messages %}
+      <li class="{{ category }}">{{ message }}</li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+  {% endwith %}
+
+  <div class="card">
+    <h2>Two-factor authentication</h2>
+    {% if mfa_enabled %}
+      <span class="status on">● Enabled ({{ "Authenticator app" if mfa_method == "totp" else "Email code" }})</span>
+      {% if mfa_method == "email" %}
+      <p>You'll be emailed a code every time you log in.</p>
+      {% else %}
+      <p>You'll be asked for a code from your authenticator app every time you log in.</p>
+      {% endif %}
+      <form method="post" action="{{ url_for('mfa_disable') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="field">
+          <label for="password">Confirm your password to disable</label>
+          <input type="password" id="password" name="password" required>
+        </div>
+        <button class="btn danger" type="submit">Disable two-factor authentication</button>
+      </form>
+    {% else %}
+      <span class="status off">○ Not enabled</span>
+      <p>Add an extra layer of protection by requiring a code at login. Choose a method:</p>
+      <div class="options">
+        <a class="btn" href="{{ url_for('mfa_setup') }}">Authenticator app</a>
+        <a class="btn secondary" href="{{ url_for('mfa_setup_email') }}">Email code</a>
+      </div>
+    {% endif %}
+  </div>
+</main>
+<script>
+(function () {
+  var idleLimitMs = 5 * 60 * 1000; // keep in sync with IDLE_TIMEOUT_SECONDS in app.py
+  var timer;
+  function resetTimer() {
+    clearTimeout(timer);
+    timer = setTimeout(function () { window.location.href = "/logout"; }, idleLimitMs);
+  }
+  ["mousemove", "mousedown", "keydown", "scroll", "touchstart"].forEach(function (evt) {
+    document.addEventListener(evt, resetTimer, { passive: true });
+  });
+  resetTimer();
+})();
+</script>
+</body>
+</html>

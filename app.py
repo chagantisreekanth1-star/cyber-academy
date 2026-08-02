@@ -1,9 +1,19 @@
+import base64
+import hashlib
+import io
 import os
 import re
+import secrets
+import smtplib
 import sqlite3
+import time
+from datetime import timedelta
+from email.message import EmailMessage
 from functools import wraps
 from urllib.parse import urljoin, urlparse
 
+import pyotp
+import qrcode
 from flask import Flask, abort, flash, g, redirect, render_template, request, session, url_for
 from flask_wtf import CSRFProtect
 from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
@@ -16,6 +26,22 @@ csrf = CSRFProtect(app)
 DB_PATH = os.path.join(os.path.dirname(__file__), "users.db")
 RESET_SALT = "password-reset"
 serializer = URLSafeTimedSerializer(app.secret_key)
+
+MFA_ISSUER = "Cyber Academy"
+
+IDLE_TIMEOUT_SECONDS = 300
+app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(seconds=IDLE_TIMEOUT_SECONDS)
+
+MAIL_SERVER = os.environ.get("MAIL_SERVER")
+MAIL_PORT = int(os.environ.get("MAIL_PORT", "587"))
+MAIL_USERNAME = os.environ.get("MAIL_USERNAME")
+MAIL_PASSWORD = os.environ.get("MAIL_PASSWORD")
+MAIL_USE_SSL = os.environ.get("MAIL_USE_SSL", "false").lower() in ("1", "true", "yes")
+MAIL_USE_TLS = os.environ.get("MAIL_USE_TLS", "true").lower() in ("1", "true", "yes") and not MAIL_USE_SSL
+MAIL_FROM = os.environ.get("MAIL_FROM", MAIL_USERNAME)
+
+EMAIL_OTP_TTL_SECONDS = 600
+EMAIL_OTP_RESEND_COOLDOWN = 30
 
 COURSES = [
     {
@@ -489,6 +515,13 @@ def init_db():
         )
         """
     )
+    existing_columns = {row[1] for row in db.execute("PRAGMA table_info(users)")}
+    if "mfa_secret" not in existing_columns:
+        db.execute("ALTER TABLE users ADD COLUMN mfa_secret TEXT")
+    if "mfa_enabled" not in existing_columns:
+        db.execute("ALTER TABLE users ADD COLUMN mfa_enabled INTEGER NOT NULL DEFAULT 0")
+    if "mfa_method" not in existing_columns:
+        db.execute("ALTER TABLE users ADD COLUMN mfa_method TEXT")
     db.commit()
     db.close()
 
@@ -506,9 +539,119 @@ def login_required(view):
     return wrapped
 
 
+@app.before_request
+def enforce_idle_timeout():
+    if "user_id" not in session:
+        return None
+
+    now = time.time()
+    last_activity = session.get("last_activity", now)
+    if now - last_activity > IDLE_TIMEOUT_SECONDS:
+        session.clear()
+        flash("You've been logged out due to inactivity.", "error")
+        return redirect(url_for("login", next=request.path))
+
+    session["last_activity"] = now
+    session.permanent = True
+    return None
+
+
 @app.context_processor
 def inject_user():
     return {"current_user_name": session.get("user_name")}
+
+
+def safe_redirect_target(next_url):
+    if not next_url:
+        return url_for("home")
+    site_url = urlparse(request.host_url)
+    redirect_url = urlparse(urljoin(request.host_url, next_url))
+    if redirect_url.scheme in ("http", "https") and redirect_url.netloc == site_url.netloc:
+        return next_url
+    return url_for("home")
+
+
+def complete_login(user):
+    session.clear()
+    session["user_id"] = user["id"]
+    session["user_name"] = user["name"]
+
+
+def qr_code_data_uri(uri):
+    img = qrcode.make(uri)
+    buf = io.BytesIO()
+    img.save(buf, format="PNG")
+    encoded = base64.b64encode(buf.getvalue()).decode("ascii")
+    return f"data:image/png;base64,{encoded}"
+
+
+def generate_email_otp():
+    return f"{secrets.randbelow(1_000_000):06d}"
+
+
+def hash_otp(code):
+    return hashlib.sha256(code.encode()).hexdigest()
+
+
+def send_email(to_address, subject, body):
+    if not MAIL_SERVER or not MAIL_USERNAME or not MAIL_PASSWORD:
+        raise RuntimeError(
+            "Email is not configured. Set MAIL_SERVER, MAIL_USERNAME, and MAIL_PASSWORD."
+        )
+    msg = EmailMessage()
+    msg["Subject"] = subject
+    msg["From"] = MAIL_FROM
+    msg["To"] = to_address
+    msg.set_content(body)
+
+    try:
+        if MAIL_USE_SSL:
+            with smtplib.SMTP_SSL(MAIL_SERVER, MAIL_PORT, timeout=10) as smtp:
+                smtp.login(MAIL_USERNAME, MAIL_PASSWORD)
+                smtp.send_message(msg)
+        else:
+            with smtplib.SMTP(MAIL_SERVER, MAIL_PORT, timeout=10) as smtp:
+                if MAIL_USE_TLS:
+                    smtp.starttls()
+                smtp.login(MAIL_USERNAME, MAIL_PASSWORD)
+                smtp.send_message(msg)
+    except Exception:
+        app.logger.exception(
+            "Failed to send email via %s:%s (ssl=%s, tls=%s, user=%s)",
+            MAIL_SERVER, MAIL_PORT, MAIL_USE_SSL, MAIL_USE_TLS, MAIL_USERNAME,
+        )
+        raise
+
+
+def send_otp_email(to_address, code):
+    send_email(
+        to_address,
+        f"Your {MFA_ISSUER} verification code",
+        f"Your verification code is {code}. It expires in 10 minutes.\n\n"
+        "If you didn't request this, you can ignore this email.",
+    )
+
+
+def start_email_otp(user, prefix):
+    code = generate_email_otp()
+    session[f"{prefix}_hash"] = hash_otp(code)
+    session[f"{prefix}_expires"] = time.time() + EMAIL_OTP_TTL_SECONDS
+    session[f"{prefix}_sent_at"] = time.time()
+    send_otp_email(user["email"], code)
+
+
+def check_email_otp(code, prefix):
+    code_hash = session.get(f"{prefix}_hash")
+    expires = session.get(f"{prefix}_expires")
+    if not code_hash or not expires or time.time() > expires:
+        return False
+    return hash_otp(code) == code_hash
+
+
+def clear_email_otp(prefix):
+    session.pop(f"{prefix}_hash", None)
+    session.pop(f"{prefix}_expires", None)
+    session.pop(f"{prefix}_sent_at", None)
 
 
 @app.route("/register", methods=["GET", "POST"])
@@ -551,19 +694,86 @@ def login():
         user = db.execute("SELECT * FROM users WHERE email = ?", (email,)).fetchone()
 
         if user and check_password_hash(user["password_hash"], password):
-            session["user_id"] = user["id"]
-            session["user_name"] = user["name"]
-            flash(f"Welcome back, {user['name']}!", "success")
             next_url = request.args.get("next", "")
-            site_url = urlparse(request.host_url)
-            redirect_url = urlparse(urljoin(request.host_url, next_url))
-            if redirect_url.scheme in ("http", "https") and redirect_url.netloc == site_url.netloc:
-                return redirect(next_url)
-            return redirect(url_for("home"))
+            if user["mfa_enabled"]:
+                session["mfa_user_id"] = user["id"]
+                session["mfa_next"] = next_url
+                if user["mfa_method"] == "email":
+                    try:
+                        start_email_otp(user, "mfa_login_email")
+                    except Exception:
+                        session.pop("mfa_user_id", None)
+                        session.pop("mfa_next", None)
+                        flash("We couldn't send a verification email. Please try again shortly.", "error")
+                        return redirect(url_for("login"))
+                    flash("We emailed you a 6-digit verification code.", "success")
+                return redirect(url_for("mfa_verify"))
+
+            complete_login(user)
+            flash(f"Welcome back, {user['name']}!", "success")
+            return redirect(safe_redirect_target(next_url))
 
         flash("Invalid email or password.", "error")
 
     return render_template("login.html")
+
+
+@app.route("/mfa/verify", methods=["GET", "POST"])
+def mfa_verify():
+    user_id = session.get("mfa_user_id")
+    if user_id is None:
+        return redirect(url_for("login"))
+
+    db = get_db()
+    user = db.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchone()
+    if user is None or not user["mfa_enabled"]:
+        session.pop("mfa_user_id", None)
+        session.pop("mfa_next", None)
+        return redirect(url_for("login"))
+
+    if request.method == "POST":
+        code = request.form.get("code", "").strip()
+        if user["mfa_method"] == "email":
+            valid = check_email_otp(code, "mfa_login_email")
+        else:
+            valid = pyotp.TOTP(user["mfa_secret"]).verify(code, valid_window=1)
+
+        if valid:
+            next_url = session.pop("mfa_next", "")
+            session.pop("mfa_user_id", None)
+            clear_email_otp("mfa_login_email")
+            complete_login(user)
+            flash(f"Welcome back, {user['name']}!", "success")
+            return redirect(safe_redirect_target(next_url))
+
+        flash("That code is invalid or has expired.", "error")
+
+    return render_template("mfa_verify.html", mfa_method=user["mfa_method"], email=user["email"])
+
+
+@app.route("/mfa/resend", methods=["POST"])
+def mfa_resend():
+    user_id = session.get("mfa_user_id")
+    if user_id is None:
+        return redirect(url_for("login"))
+
+    db = get_db()
+    user = db.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchone()
+    if user is None or not user["mfa_enabled"] or user["mfa_method"] != "email":
+        return redirect(url_for("mfa_verify"))
+
+    last_sent = session.get("mfa_login_email_sent_at", 0)
+    if time.time() - last_sent < EMAIL_OTP_RESEND_COOLDOWN:
+        flash("Please wait a moment before requesting another code.", "error")
+        return redirect(url_for("mfa_verify"))
+
+    try:
+        start_email_otp(user, "mfa_login_email")
+        flash("We sent you a new code.", "success")
+    except Exception:
+        flash("We couldn't send a verification email. Please try again shortly.", "error")
+
+    return redirect(url_for("mfa_verify"))
 
 
 @app.route("/logout")
@@ -583,10 +793,20 @@ def forgot_password():
 
         # Same message regardless of whether the account exists, so the
         # form can't be used to enumerate registered emails.
-        flash("If an account exists for that email, a reset link is ready below.", "success")
+        flash("If an account exists for that email, a reset link is on its way.", "success")
         if user:
             token = serializer.dumps(email, salt=RESET_SALT)
-            reset_link = url_for("reset_password", token=token, _external=True)
+            link = url_for("reset_password", token=token, _external=True)
+            try:
+                send_email(
+                    user["email"],
+                    f"Reset your {MFA_ISSUER} password",
+                    "We received a request to reset your password. Use the link below "
+                    f"within the next hour:\n\n{link}\n\n"
+                    "If you didn't request this, you can ignore this email.",
+                )
+            except Exception:
+                reset_link = link
 
     return render_template("forgot_password.html", reset_link=reset_link)
 
@@ -620,6 +840,110 @@ def reset_password(token):
             return redirect(url_for("login"))
 
     return render_template("reset_password.html", token=token)
+
+
+@app.route("/security")
+@login_required
+def security():
+    db = get_db()
+    user = db.execute("SELECT * FROM users WHERE id = ?", (session["user_id"],)).fetchone()
+    return render_template("security.html", mfa_enabled=bool(user["mfa_enabled"]), mfa_method=user["mfa_method"])
+
+
+@app.route("/mfa/setup", methods=["GET", "POST"])
+@login_required
+def mfa_setup():
+    db = get_db()
+    user = db.execute("SELECT * FROM users WHERE id = ?", (session["user_id"],)).fetchone()
+    if user["mfa_enabled"]:
+        return redirect(url_for("security"))
+
+    secret = session.get("mfa_setup_secret")
+    if not secret:
+        secret = pyotp.random_base32()
+        session["mfa_setup_secret"] = secret
+
+    if request.method == "POST":
+        code = request.form.get("code", "").strip()
+        totp = pyotp.TOTP(secret)
+        if totp.verify(code, valid_window=1):
+            db.execute(
+                "UPDATE users SET mfa_secret = ?, mfa_method = 'totp', mfa_enabled = 1 WHERE id = ?",
+                (secret, user["id"]),
+            )
+            db.commit()
+            session.pop("mfa_setup_secret", None)
+            flash("Two-factor authentication is now enabled.", "success")
+            return redirect(url_for("security"))
+
+        flash("That code is invalid or has expired. Try the latest code from your app.", "error")
+
+    provisioning_uri = pyotp.TOTP(secret).provisioning_uri(name=user["email"], issuer_name=MFA_ISSUER)
+    qr_data_uri = qr_code_data_uri(provisioning_uri)
+    return render_template("mfa_setup.html", secret=secret, qr_data_uri=qr_data_uri)
+
+
+@app.route("/mfa/setup/email", methods=["GET", "POST"])
+@login_required
+def mfa_setup_email():
+    db = get_db()
+    user = db.execute("SELECT * FROM users WHERE id = ?", (session["user_id"],)).fetchone()
+    if user["mfa_enabled"]:
+        return redirect(url_for("security"))
+
+    if request.method == "POST":
+        if "resend" in request.form:
+            last_sent = session.get("mfa_setup_email_sent_at", 0)
+            if time.time() - last_sent < EMAIL_OTP_RESEND_COOLDOWN:
+                flash("Please wait a moment before requesting another code.", "error")
+            else:
+                try:
+                    start_email_otp(user, "mfa_setup_email")
+                    flash("We sent you a new code.", "success")
+                except Exception:
+                    flash("We couldn't send a verification email. Please try again shortly.", "error")
+        else:
+            code = request.form.get("code", "").strip()
+            if check_email_otp(code, "mfa_setup_email"):
+                db.execute(
+                    "UPDATE users SET mfa_method = 'email', mfa_secret = NULL, mfa_enabled = 1 WHERE id = ?",
+                    (user["id"],),
+                )
+                db.commit()
+                clear_email_otp("mfa_setup_email")
+                flash("Two-factor authentication via email is now enabled.", "success")
+                return redirect(url_for("security"))
+
+            flash("That code is invalid or has expired.", "error")
+
+    if "mfa_setup_email_hash" not in session:
+        try:
+            start_email_otp(user, "mfa_setup_email")
+            flash("We emailed you a verification code.", "success")
+        except Exception:
+            flash("We couldn't send a verification email. Check your mail configuration and try again.", "error")
+
+    return render_template("mfa_setup_email.html", email=user["email"])
+
+
+@app.route("/mfa/disable", methods=["POST"])
+@login_required
+def mfa_disable():
+    password = request.form.get("password", "")
+    db = get_db()
+    user = db.execute("SELECT * FROM users WHERE id = ?", (session["user_id"],)).fetchone()
+
+    if not check_password_hash(user["password_hash"], password):
+        flash("Incorrect password.", "error")
+    else:
+        db.execute(
+            "UPDATE users SET mfa_secret = NULL, mfa_method = NULL, mfa_enabled = 0 WHERE id = ?",
+            (user["id"],),
+        )
+        db.commit()
+        flash("Two-factor authentication has been disabled.", "success")
+
+    return redirect(url_for("security"))
 
 
 @app.route("/")

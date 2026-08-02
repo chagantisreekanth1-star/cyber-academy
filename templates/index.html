@@ -69,6 +69,7 @@
   <div>
     <a href="/">Courses</a><a href="/">Labs</a><a href="/">About</a>
     {% if current_user_name %}
+    <a href="{{ url_for('security') }}">Security</a>
     <a href="{{ url_for('logout') }}">Log out ({{ current_user_name }})</a>
     {% endif %}
   </div>
@@ -138,6 +139,20 @@ function filterCourses() {
 
   document.getElementById('noResults').style.display = visible === 0 ? 'block' : 'none';
 }
+</script>
+<script>
+(function () {
+  var idleLimitMs = 5 * 60 * 1000; // keep in sync with IDLE_TIMEOUT_SECONDS in app.py
+  var timer;
+  function resetTimer() {
+    clearTimeout(timer);
+    timer = setTimeout(function () { window.location.href = "/logout"; }, idleLimitMs);
+  }
+  ["mousemove", "mousedown", "keydown", "scroll", "touchstart"].forEach(function (evt) {
+    document.addEventListener(evt, resetTimer, { passive: true });
+  });
+  resetTimer();
+})();
 </script>
 </body>
 </html>
