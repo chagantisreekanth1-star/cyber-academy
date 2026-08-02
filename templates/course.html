@@ -30,14 +30,17 @@
   main { max-width: 860px; margin: 0 auto; padding: 46px 40px 90px; }
   h2 { font-size: 22px; margin-bottom: 22px; }
   ol { list-style: none; counter-reset: n; }
-  li { counter-increment: n; display: flex; align-items: center; gap: 18px;
+  li { counter-increment: n; display: flex; align-items: flex-start; gap: 18px;
        background: #141821; border: 1px solid #1e222b; border-radius: 11px;
        padding: 18px 22px; margin-bottom: 12px; transition: border-color .2s; }
   li:hover { border-color: #33405c; }
   li::before { content: counter(n); flex: 0 0 34px; height: 34px;
       display: grid; place-items: center; border-radius: 50%;
       background: #1a2033; color: #7ba0ff; font-size: 14px; font-weight: 600; }
-  .len { margin-left: auto; color: #6b7484; font-size: 13px; }
+  .lesson-text { flex: 1; }
+  .lesson-text .title { font-weight: 600; }
+  .lesson-text .desc { color: #9aa3b2; font-size: 14px; margin-top: 4px; }
+  .len { flex: 0 0 auto; color: #6b7484; font-size: 13px; margin-top: 2px; }
   .back { display: inline-block; margin-bottom: 26px; color: #5b8cff;
           text-decoration: none; font-size: 15px; }
   .back:hover { text-decoration: underline; }
@@ -69,7 +72,13 @@
   <h2>Curriculum &middot; {{ course.lessons|length }} lessons</h2>
   <ol>
     {% for lesson in course.lessons %}
-    <li>{{ lesson }}<span class="len">20 min</span></li>
+    <li>
+      <div class="lesson-text">
+        <div class="title">{{ lesson.title }}</div>
+        <div class="desc">{{ lesson.description }}</div>
+      </div>
+      <span class="len">20 min</span>
+    </li>
     {% endfor %}
   </ol>
 </main>

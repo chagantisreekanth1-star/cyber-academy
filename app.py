@@ -25,11 +25,26 @@ COURSES = [
         "level": "Intermediate",
         "progress": 35,
         "lessons": [
-            "Reconnaissance and OSINT fundamentals",
-            "Web application vulnerability classes (OWASP Top 10)",
-            "Network scanning and enumeration concepts",
-            "Authentication and session weaknesses",
-            "Reporting and responsible disclosure",
+            {
+                "title": "Reconnaissance and OSINT fundamentals",
+                "description": "Gather intelligence on a target using public sources before ever touching its systems.",
+            },
+            {
+                "title": "Web application vulnerability classes (OWASP Top 10)",
+                "description": "Survey the most common web flaws — injection, broken auth, XSS, and more — and how they're exploited.",
+            },
+            {
+                "title": "Network scanning and enumeration concepts",
+                "description": "Map hosts, open ports, and running services to build a picture of the attack surface.",
+            },
+            {
+                "title": "Authentication and session weaknesses",
+                "description": "Identify weak login flows, session fixation, and token handling issues attackers target first.",
+            },
+            {
+                "title": "Reporting and responsible disclosure",
+                "description": "Turn findings into a clear report and disclose them to vendors in a way that gets fixes shipped.",
+            },
         ],
     },
     {
@@ -40,11 +55,26 @@ COURSES = [
         "level": "Beginner",
         "progress": 60,
         "lessons": [
-            "Log analysis and SIEM basics",
-            "The incident response lifecycle",
-            "Threat hunting fundamentals",
-            "Hardening and secure configuration",
-            "Detection engineering basics",
+            {
+                "title": "Log analysis and SIEM basics",
+                "description": "Read raw logs and use a SIEM to correlate events into signals worth investigating.",
+            },
+            {
+                "title": "The incident response lifecycle",
+                "description": "Walk through preparation, detection, containment, eradication, and recovery for a security incident.",
+            },
+            {
+                "title": "Threat hunting fundamentals",
+                "description": "Proactively search for signs of compromise instead of waiting for an alert to fire.",
+            },
+            {
+                "title": "Hardening and secure configuration",
+                "description": "Reduce attack surface by locking down default settings, services, and permissions.",
+            },
+            {
+                "title": "Detection engineering basics",
+                "description": "Write detection rules that catch real attacker behavior without drowning the team in noise.",
+            },
         ],
     },
     {
@@ -55,11 +85,26 @@ COURSES = [
         "level": "Advanced",
         "progress": 10,
         "lessons": [
-            "Prompt injection: why it happens",
-            "Data poisoning and model supply chain risk",
-            "Output handling and sandboxing",
-            "AI red teaming methodology",
-            "Guardrails and evaluation",
+            {
+                "title": "Prompt injection: why it happens",
+                "description": "Understand how untrusted input can hijack an LLM's instructions and steer its behavior.",
+            },
+            {
+                "title": "Data poisoning and model supply chain risk",
+                "description": "See how tainted training data or third-party models can compromise a system downstream.",
+            },
+            {
+                "title": "Output handling and sandboxing",
+                "description": "Treat model output as untrusted input and contain what it's allowed to do next.",
+            },
+            {
+                "title": "AI red teaming methodology",
+                "description": "Systematically probe a model for jailbreaks, leakage, and unsafe behavior before attackers do.",
+            },
+            {
+                "title": "Guardrails and evaluation",
+                "description": "Build and test guardrails that catch unsafe requests and responses in production.",
+            },
         ],
     },
     {
@@ -70,12 +115,30 @@ COURSES = [
         "level": "Intermediate",
         "progress": 0,
         "lessons": [
-            "Shared responsibility model explained",
-            "Identity and access management fundamentals",
-            "Network controls: VPCs, security groups, and segmentation",
-            "Storage misconfiguration and data exposure",
-            "Logging, monitoring, and cloud-native detection",
-            "Container and Kubernetes security basics",
+            {
+                "title": "Shared responsibility model explained",
+                "description": "Draw the line between what your cloud provider secures and what's on you.",
+            },
+            {
+                "title": "Identity and access management fundamentals",
+                "description": "Design least-privilege roles and policies so a single compromised credential can't take down everything.",
+            },
+            {
+                "title": "Network controls: VPCs, security groups, and segmentation",
+                "description": "Isolate workloads and control traffic flow with virtual networks and firewall rules.",
+            },
+            {
+                "title": "Storage misconfiguration and data exposure",
+                "description": "Spot the bucket and database misconfigurations that lead to public data leaks.",
+            },
+            {
+                "title": "Logging, monitoring, and cloud-native detection",
+                "description": "Turn on the right cloud logs and alerts to catch suspicious activity as it happens.",
+            },
+            {
+                "title": "Container and Kubernetes security basics",
+                "description": "Secure images, runtime configuration, and cluster access for containerized workloads.",
+            },
         ],
     },
     {
@@ -86,12 +149,30 @@ COURSES = [
         "level": "Intermediate",
         "progress": 0,
         "lessons": [
-            "EDR architecture: sensors, telemetry, and cloud analytics",
-            "Process, file, and network activity monitoring",
-            "Behavioral detection vs. signature-based detection",
-            "Triage and investigation of endpoint alerts",
-            "Isolating and remediating compromised hosts",
-            "Building detection rules from MITRE ATT&CK techniques",
+            {
+                "title": "EDR architecture: sensors, telemetry, and cloud analytics",
+                "description": "See how endpoint sensors collect telemetry and feed it to cloud-based detection engines.",
+            },
+            {
+                "title": "Process, file, and network activity monitoring",
+                "description": "Track what's running, what's changing on disk, and what's talking to the network.",
+            },
+            {
+                "title": "Behavioral detection vs. signature-based detection",
+                "description": "Compare catching known bad hashes against catching suspicious patterns of behavior.",
+            },
+            {
+                "title": "Triage and investigation of endpoint alerts",
+                "description": "Work through an EDR alert queue to separate real threats from noise.",
+            },
+            {
+                "title": "Isolating and remediating compromised hosts",
+                "description": "Contain an infected endpoint and clean it up without tipping off the attacker.",
+            },
+            {
+                "title": "Building detection rules from MITRE ATT&CK techniques",
+                "description": "Map real attacker techniques to detection logic using the ATT&CK framework.",
+            },
         ],
     },
     {
@@ -102,12 +183,30 @@ COURSES = [
         "level": "Intermediate",
         "progress": 0,
         "lessons": [
-            "Data classification and sensitivity labeling",
-            "Encryption at rest and in transit",
-            "Data loss prevention (DLP) fundamentals",
-            "Access control and least privilege for data stores",
-            "Data masking, tokenization, and anonymization",
-            "Compliance frameworks: GDPR, HIPAA, and PCI DSS basics",
+            {
+                "title": "Data classification and sensitivity labeling",
+                "description": "Sort data by sensitivity so the right controls get applied to the right assets.",
+            },
+            {
+                "title": "Encryption at rest and in transit",
+                "description": "Protect data as it's stored and as it moves between systems.",
+            },
+            {
+                "title": "Data loss prevention (DLP) fundamentals",
+                "description": "Detect and block sensitive data from leaving through email, uploads, or removable media.",
+            },
+            {
+                "title": "Access control and least privilege for data stores",
+                "description": "Limit who and what can read or write sensitive data to only what's necessary.",
+            },
+            {
+                "title": "Data masking, tokenization, and anonymization",
+                "description": "Reduce exposure by replacing real sensitive values with safe substitutes where possible.",
+            },
+            {
+                "title": "Compliance frameworks: GDPR, HIPAA, and PCI DSS basics",
+                "description": "Get oriented on the major data-protection regulations and what they require.",
+            },
         ],
     },
 ]
