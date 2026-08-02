@@ -37,6 +37,8 @@
   li::before { content: counter(n); flex: 0 0 34px; height: 34px;
       display: grid; place-items: center; border-radius: 50%;
       background: #1a2033; color: #7ba0ff; font-size: 14px; font-weight: 600; }
+  .lesson-link { flex: 1; display: flex; align-items: flex-start; gap: 18px;
+      text-decoration: none; color: inherit; }
   .lesson-text { flex: 1; }
   .lesson-text .title { font-weight: 600; }
   .lesson-text .desc { color: #9aa3b2; font-size: 14px; margin-top: 4px; }
@@ -81,11 +83,13 @@
       <ol>
         {% for lesson in module.lessons %}
         <li>
-          <div class="lesson-text">
-            <div class="title">{{ lesson.title }}</div>
-            <div class="desc">{{ lesson.description }}</div>
-          </div>
-          <span class="len">20 min</span>
+          <a class="lesson-link" href="{{ url_for('lesson', course_id=course.id, lesson_slug=lesson.slug) }}">
+            <div class="lesson-text">
+              <div class="title">{{ lesson.title }}</div>
+              <div class="desc">{{ lesson.description }}</div>
+            </div>
+            <span class="len">20 min</span>
+          </a>
         </li>
         {% endfor %}
       </ol>
@@ -95,11 +99,13 @@
     <ol>
       {% for lesson in course.lessons %}
       <li>
-        <div class="lesson-text">
-          <div class="title">{{ lesson.title }}</div>
-          <div class="desc">{{ lesson.description }}</div>
-        </div>
-        <span class="len">20 min</span>
+        <a class="lesson-link" href="{{ url_for('lesson', course_id=course.id, lesson_slug=lesson.slug) }}">
+          <div class="lesson-text">
+            <div class="title">{{ lesson.title }}</div>
+            <div class="desc">{{ lesson.description }}</div>
+          </div>
+          <span class="len">20 min</span>
+        </a>
       </li>
       {% endfor %}
     </ol>

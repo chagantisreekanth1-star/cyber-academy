@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ lesson.title }} — {{ course.title }} — Cyber Academy</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+         background: #0b0d12; color: #e8eaed; line-height: 1.6; }
+  nav { display: flex; justify-content: space-between; align-items: center;
+        padding: 18px 40px; border-bottom: 1px solid #1e222b; }
+  .logo { font-weight: 700; font-size: 20px; }
+  .logo span { color: #5b8cff; }
+  nav a { color: #9aa3b2; text-decoration: none; font-size: 15px; }
+  nav a:hover { color: #fff; }
+
+  main { max-width: 720px; margin: 0 auto; padding: 50px 40px 90px; }
+  .back { display: inline-block; margin-bottom: 22px; color: #5b8cff;
+          text-decoration: none; font-size: 15px; }
+  .back:hover { text-decoration: underline; }
+  .eyebrow { font-size: 13px; color: #7ba0ff; margin-bottom: 10px; }
+  h1 { font-size: 34px; letter-spacing: -.8px; margin-bottom: 14px; }
+  .desc { color: #9aa3b2; font-size: 17px; margin-bottom: 34px; }
+  .content p { margin-bottom: 18px; font-size: 16px; color: #dfe2e8; }
+  .content p:last-child { margin-bottom: 0; }
+  .no-content { color: #6b7484; font-size: 15px; font-style: italic; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">Cyber<span>Academy</span></div>
+  <div>
+    <a href="{{ url_for('course', course_id=course.id) }}">{{ course.title }}</a>
+    {% if current_user_name %}
+    <a href="{{ url_for('logout') }}" style="margin-left: 18px;">Log out ({{ current_user_name }})</a>
+    {% endif %}
+  </div>
+</nav>
+
+<main>
+  <a class="back" href="{{ url_for('course', course_id=course.id) }}">&larr; Back to {{ course.title }}</a>
+  <div class="eyebrow">{{ course.title }}</div>
+  <h1>{{ lesson.title }}</h1>
+  <p class="desc">{{ lesson.description }}</p>
+
+  <div class="content">
+    {% if lesson.content %}
+      {% for paragraph in lesson.content %}
+      <p>{{ paragraph }}</p>
+      {% endfor %}
+    {% else %}
+      <p class="no-content">Full lesson content for this topic is coming soon.</p>
+    {% endif %}
+  </div>
+</main>
+
+</body>
+</html>

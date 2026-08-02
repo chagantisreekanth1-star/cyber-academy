@@ -1,4 +1,5 @@
 import os
+import re
 import sqlite3
 from functools import wraps
 from urllib.parse import urljoin, urlparse
@@ -76,34 +77,62 @@ COURSES = [
                     {
                         "title": "What logs are",
                         "description": "Understand what a log entry is — a timestamped record with a severity, source, and message — and where different systems write them.",
+                        "content": [
+                            "A log is a timestamped record of an event. Almost every system writes them: operating systems, web servers, firewalls, databases, applications, and network devices.",
+                            "A single log entry (a \"log line\") typically contains a timestamp, a severity level, a source, and a message describing what happened. For example, a web server might record every request with the visitor's IP address, the page requested, and the response code.",
+                        ],
                     },
                     {
                         "title": "Common types of logs",
                         "description": "Tell system, application, security, network, and audit logs apart, and know where each one lives on Linux and Windows.",
+                        "content": [
+                            "The main categories you'll encounter are system logs (OS-level events, startups, hardware issues), application logs (events from a specific program), security logs (logins, permission changes, access attempts), network logs (traffic, connections, firewall decisions), and audit logs (a trail of who did what, for compliance).",
+                            "On Linux these often live in /var/log/; on Windows they're in the Event Viewer.",
+                        ],
                     },
                     {
                         "title": "Why analyze logs",
                         "description": "See the four main reasons to analyze logs: troubleshooting, security monitoring, performance monitoring, and compliance.",
+                        "content": [
+                            "The main reasons are troubleshooting (finding why something broke), security monitoring (detecting intrusions, unusual access, or attacks), performance monitoring (spotting slowdowns and bottlenecks), and compliance/auditing (proving what happened for regulations like PCI-DSS or HIPAA).",
+                        ],
                     },
                     {
                         "title": "The log analysis process",
                         "description": "Collect, normalize, parse, and correlate logs from multiple sources to turn scattered entries into a coherent picture.",
+                        "content": [
+                            "A typical workflow is: collect logs from all your sources into one place, normalize them into a consistent format so different sources can be compared, parse them to pull out fields (IP, timestamp, error code), then search, filter, and correlate events to find patterns.",
+                            "Correlation is key — one log line rarely tells the whole story, but linking events across sources reveals what actually happened.",
+                        ],
                     },
                     {
                         "title": "Log severity levels",
                         "description": "Use DEBUG through CRITICAL severity levels to filter out routine noise and focus on real problems.",
+                        "content": [
+                            "Most systems use levels roughly ordered as: DEBUG, INFO, WARN, ERROR, and CRITICAL/FATAL. Filtering by level lets you ignore routine noise and focus on problems.",
+                        ],
                     },
                     {
                         "title": "Common tools",
                         "description": "Get comfortable with grep, awk, sed, and tail -f for quick digging, and know when a SIEM like the ELK Stack, Splunk, or Sentinel is the better tool.",
+                        "content": [
+                            "Basic command-line tools include grep (search), awk and sed (extract and transform), tail -f (watch logs live), and cut/sort/uniq for counting.",
+                            "For larger environments, log management and SIEM platforms are used — the ELK/Elastic Stack (Elasticsearch, Logstash, Kibana), Splunk, Graylog, and Microsoft Sentinel are the ones most often mentioned in courses.",
+                        ],
                     },
                     {
                         "title": "Key techniques",
                         "description": "Apply filtering, pattern recognition, anomaly detection, correlation, and visualization to make logs tell a story.",
+                        "content": [
+                            "The core techniques are filtering (narrowing to relevant entries), pattern recognition (spotting recurring errors), anomaly detection (flagging what deviates from normal), correlation (linking related events), and visualization (dashboards and charts that make trends obvious).",
+                        ],
                     },
                     {
                         "title": "Worked example: finding brute-force logins",
                         "description": "Use grep on /var/log/auth.log to pull failed SSH attempts and spot a brute-force attack by counting attempts per IP.",
+                        "content": [
+                            "To find all failed SSH login attempts on a Linux server, you might run something like grep \"Failed password\" /var/log/auth.log, then pipe it through tools to count attempts per IP address — a spike from one IP suggests a brute-force attack.",
+                        ],
                     },
                 ],
             },
@@ -339,8 +368,29 @@ def lesson_count(course):
     return len(course["lessons"])
 
 
+def iter_lessons(course):
+    if "modules" in course:
+        for module in course["modules"]:
+            yield from module["lessons"]
+    else:
+        yield from course["lessons"]
+
+
+def slugify(text):
+    return re.sub(r"[^a-z0-9]+", "-", text.lower()).strip("-")
+
+
+def find_lesson(course, slug):
+    for lesson in iter_lessons(course):
+        if lesson["slug"] == slug:
+            return lesson
+    return None
+
+
 for _course in COURSES:
     _course["lesson_count"] = lesson_count(_course)
+    for _lesson in iter_lessons(_course):
+        _lesson["slug"] = slugify(_lesson["title"])
 
 
 def get_db():
@@ -517,6 +567,18 @@ def course(course_id):
     if match is None:
         abort(404)
     return render_template("course.html", course=match)
+
+
+@app.route("/course/<course_id>/lesson/<lesson_slug>")
+@login_required
+def lesson(course_id, lesson_slug):
+    course_match = next((c for c in COURSES if c["id"] == course_id), None)
+    if course_match is None:
+        abort(404)
+    lesson_match = find_lesson(course_match, lesson_slug)
+    if lesson_match is None:
+        abort(404)
+    return render_template("lesson.html", course=course_match, lesson=lesson_match)
 
 
 if __name__ == "__main__":
