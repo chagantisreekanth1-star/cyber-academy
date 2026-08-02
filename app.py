@@ -75,6 +75,10 @@ COURSES = [
                 "description": "Read raw logs and use a SIEM to correlate events into signals worth investigating.",
             },
             {
+                "title": "Splunk basics",
+                "description": "Ingest logs into Splunk and use SPL to search, filter, and build simple alerts from the data.",
+            },
+            {
                 "title": "The incident response lifecycle",
                 "description": "Walk through preparation, detection, containment, eradication, and recovery for a security incident.",
             },
