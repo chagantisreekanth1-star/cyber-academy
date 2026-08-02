@@ -1,6 +1,7 @@
 import base64
 import hashlib
 import io
+import logging
 import os
 import re
 import secrets
@@ -22,6 +23,9 @@ from werkzeug.security import check_password_hash, generate_password_hash
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-change-me")
 csrf = CSRFProtect(app)
+
+logging.basicConfig(level=logging.INFO)
+app.logger.setLevel(logging.INFO)
 
 DB_PATH = os.path.join(os.path.dirname(__file__), "users.db")
 RESET_SALT = "password-reset"
@@ -805,8 +809,11 @@ def forgot_password():
                     f"within the next hour:\n\n{link}\n\n"
                     "If you didn't request this, you can ignore this email.",
                 )
+                app.logger.info("Password reset email accepted by SMTP server for %s", email)
             except Exception:
                 reset_link = link
+        else:
+            app.logger.info("Password reset requested for unregistered email: %s", email)
 
     return render_template("forgot_password.html", reset_link=reset_link)
 
