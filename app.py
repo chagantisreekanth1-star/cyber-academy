@@ -24,26 +24,41 @@ COURSES = [
         "icon": "🎯",
         "level": "Intermediate",
         "progress": 35,
-        "lessons": [
+        "modules": [
             {
-                "title": "Reconnaissance and OSINT fundamentals",
-                "description": "Gather intelligence on a target using public sources before ever touching its systems.",
+                "name": "Reconnaissance",
+                "lessons": [
+                    {
+                        "title": "Reconnaissance and OSINT fundamentals",
+                        "description": "Gather intelligence on a target using public sources before ever touching its systems.",
+                    },
+                    {
+                        "title": "Network scanning and enumeration concepts",
+                        "description": "Map hosts, open ports, and running services to build a picture of the attack surface.",
+                    },
+                ],
             },
             {
-                "title": "Web application vulnerability classes (OWASP Top 10)",
-                "description": "Survey the most common web flaws — injection, broken auth, XSS, and more — and how they're exploited.",
+                "name": "Web Application Attacks",
+                "lessons": [
+                    {
+                        "title": "Web application vulnerability classes (OWASP Top 10)",
+                        "description": "Survey the most common web flaws — injection, broken auth, XSS, and more — and how they're exploited.",
+                    },
+                    {
+                        "title": "Authentication and session weaknesses",
+                        "description": "Identify weak login flows, session fixation, and token handling issues attackers target first.",
+                    },
+                ],
             },
             {
-                "title": "Network scanning and enumeration concepts",
-                "description": "Map hosts, open ports, and running services to build a picture of the attack surface.",
-            },
-            {
-                "title": "Authentication and session weaknesses",
-                "description": "Identify weak login flows, session fixation, and token handling issues attackers target first.",
-            },
-            {
-                "title": "Reporting and responsible disclosure",
-                "description": "Turn findings into a clear report and disclose them to vendors in a way that gets fixes shipped.",
+                "name": "Reporting & Disclosure",
+                "lessons": [
+                    {
+                        "title": "Reporting and responsible disclosure",
+                        "description": "Turn findings into a clear report and disclose them to vendors in a way that gets fixes shipped.",
+                    },
+                ],
             },
         ],
     },
@@ -212,6 +227,16 @@ COURSES = [
 ]
 
 
+def lesson_count(course):
+    if "modules" in course:
+        return sum(len(module["lessons"]) for module in course["modules"])
+    return len(course["lessons"])
+
+
+for _course in COURSES:
+    _course["lesson_count"] = lesson_count(_course)
+
+
 def get_db():
     db = getattr(g, "_database", None)
     if db is None:
@@ -375,7 +400,7 @@ def reset_password(token):
 @app.route("/")
 @login_required
 def home():
-    total = sum(len(c["lessons"]) for c in COURSES)
+    total = sum(c["lesson_count"] for c in COURSES)
     return render_template("index.html", courses=COURSES, total_lessons=total)
 
 

@@ -41,6 +41,9 @@
   .lesson-text .title { font-weight: 600; }
   .lesson-text .desc { color: #9aa3b2; font-size: 14px; margin-top: 4px; }
   .len { flex: 0 0 auto; color: #6b7484; font-size: 13px; margin-top: 2px; }
+  .module { margin-bottom: 28px; }
+  .module-name { display: flex; align-items: center; gap: 8px; font-size: 15px;
+      color: #7ba0ff; margin-bottom: 14px; }
   .back { display: inline-block; margin-bottom: 26px; color: #5b8cff;
           text-decoration: none; font-size: 15px; }
   .back:hover { text-decoration: underline; }
@@ -69,18 +72,38 @@
 
 <main>
   <a class="back" href="/">&larr; Back to courses</a>
-  <h2>Curriculum &middot; {{ course.lessons|length }} lessons</h2>
-  <ol>
-    {% for lesson in course.lessons %}
-    <li>
-      <div class="lesson-text">
-        <div class="title">{{ lesson.title }}</div>
-        <div class="desc">{{ lesson.description }}</div>
-      </div>
-      <span class="len">20 min</span>
-    </li>
+  <h2>Curriculum &middot; {{ course.lesson_count }} lessons</h2>
+
+  {% if course.modules %}
+    {% for module in course.modules %}
+    <div class="module">
+      <div class="module-name">📁 {{ module.name }}</div>
+      <ol>
+        {% for lesson in module.lessons %}
+        <li>
+          <div class="lesson-text">
+            <div class="title">{{ lesson.title }}</div>
+            <div class="desc">{{ lesson.description }}</div>
+          </div>
+          <span class="len">20 min</span>
+        </li>
+        {% endfor %}
+      </ol>
+    </div>
     {% endfor %}
-  </ol>
+  {% else %}
+    <ol>
+      {% for lesson in course.lessons %}
+      <li>
+        <div class="lesson-text">
+          <div class="title">{{ lesson.title }}</div>
+          <div class="desc">{{ lesson.description }}</div>
+        </div>
+        <span class="len">20 min</span>
+      </li>
+      {% endfor %}
+    </ol>
+  {% endif %}
 </main>
 
 </body>
