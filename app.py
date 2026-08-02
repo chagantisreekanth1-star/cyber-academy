@@ -163,30 +163,56 @@ COURSES = [
         "icon": "🖥️",
         "level": "Intermediate",
         "progress": 0,
-        "lessons": [
+        "modules": [
             {
-                "title": "EDR architecture: sensors, telemetry, and cloud analytics",
-                "description": "See how endpoint sensors collect telemetry and feed it to cloud-based detection engines.",
+                "name": "Detection & Response",
+                "lessons": [
+                    {
+                        "title": "EDR architecture: sensors, telemetry, and cloud analytics",
+                        "description": "See how endpoint sensors collect telemetry and feed it to cloud-based detection engines.",
+                    },
+                    {
+                        "title": "Process, file, and network activity monitoring",
+                        "description": "Track what's running, what's changing on disk, and what's talking to the network.",
+                    },
+                    {
+                        "title": "Behavioral detection vs. signature-based detection",
+                        "description": "Compare catching known bad hashes against catching suspicious patterns of behavior.",
+                    },
+                    {
+                        "title": "Triage and investigation of endpoint alerts",
+                        "description": "Work through an EDR alert queue to separate real threats from noise.",
+                    },
+                    {
+                        "title": "Isolating and remediating compromised hosts",
+                        "description": "Contain an infected endpoint and clean it up without tipping off the attacker.",
+                    },
+                    {
+                        "title": "Building detection rules from MITRE ATT&CK techniques",
+                        "description": "Map real attacker techniques to detection logic using the ATT&CK framework.",
+                    },
+                ],
             },
             {
-                "title": "Process, file, and network activity monitoring",
-                "description": "Track what's running, what's changing on disk, and what's talking to the network.",
-            },
-            {
-                "title": "Behavioral detection vs. signature-based detection",
-                "description": "Compare catching known bad hashes against catching suspicious patterns of behavior.",
-            },
-            {
-                "title": "Triage and investigation of endpoint alerts",
-                "description": "Work through an EDR alert queue to separate real threats from noise.",
-            },
-            {
-                "title": "Isolating and remediating compromised hosts",
-                "description": "Contain an infected endpoint and clean it up without tipping off the attacker.",
-            },
-            {
-                "title": "Building detection rules from MITRE ATT&CK techniques",
-                "description": "Map real attacker techniques to detection logic using the ATT&CK framework.",
+                "name": "Vulnerability Management",
+                "lessons": [
+                    {
+                        "title": "Vulnerability scanning fundamentals",
+                        "description": "Run authenticated and unauthenticated scans to discover missing patches and misconfigurations on endpoints.",
+                    },
+                    {
+                        "title": "CVSS scoring and prioritization",
+                        "description": "Score vulnerabilities by severity and exploitability to decide what to remediate first.",
+                    },
+                    {
+                        "title": "Patch management and remediation workflows",
+                        "description": "Move from a scan finding to a deployed fix without breaking production systems.",
+                    },
+                    {
+                        "title": "Vulnerability assessment reporting",
+                        "description": "Communicate risk to stakeholders and track remediation progress over time.",
+                    },
+                ],
             },
         ],
     },
