@@ -94,6 +94,22 @@ COURSES = [
             "Building detection rules from MITRE ATT&CK techniques",
         ],
     },
+    {
+        "id": "data-security",
+        "title": "Data Security",
+        "tagline": "Classify, protect, and govern data across its lifecycle.",
+        "icon": "🔐",
+        "level": "Intermediate",
+        "progress": 0,
+        "lessons": [
+            "Data classification and sensitivity labeling",
+            "Encryption at rest and in transit",
+            "Data loss prevention (DLP) fundamentals",
+            "Access control and least privilege for data stores",
+            "Data masking, tokenization, and anonymization",
+            "Compliance frameworks: GDPR, HIPAA, and PCI DSS basics",
+        ],
+    },
 ]
 
 
