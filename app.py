@@ -266,6 +266,75 @@ COURSES = [
         ],
     },
     {
+        "id": "network-security",
+        "title": "Network Security Fundamentals",
+        "tagline": "Secure the network layer — from TCP/IP to next-gen firewalls and Zero Trust.",
+        "icon": "🌐",
+        "level": "Beginner",
+        "progress": 0,
+        "modules": [
+            {
+                "name": "Networking Foundations",
+                "lessons": [
+                    {
+                        "title": "OSI models and TCP/IP protocols",
+                        "description": "Understand how the OSI and TCP/IP models describe how data moves across a network.",
+                    },
+                    {
+                        "title": "Network routing and infrastructure",
+                        "description": "See how routers, switches, and routing protocols move traffic between networks.",
+                    },
+                    {
+                        "title": "DHCP configuration",
+                        "description": "Configure DHCP to automatically assign IP addresses and network settings to devices.",
+                    },
+                    {
+                        "title": "Network administration and device management",
+                        "description": "Manage network devices day to day: configuration, monitoring, and change control.",
+                    },
+                ],
+            },
+            {
+                "name": "Network Security & Threat Mitigation",
+                "lessons": [
+                    {
+                        "title": "Foundational network security concepts",
+                        "description": "Cover the core principles that keep a network secure: confidentiality, integrity, and availability applied to network design.",
+                    },
+                    {
+                        "title": "Secure network computing environment maintenance",
+                        "description": "Keep a network environment secure over time through patching, monitoring, and configuration reviews.",
+                    },
+                    {
+                        "title": "Network security threat identification and mitigation",
+                        "description": "Identify common network-based threats and the controls used to mitigate them.",
+                    },
+                    {
+                        "title": "Network isolation and appliance protection",
+                        "description": "Segment networks and harden security appliances so a breach in one zone doesn't spread.",
+                    },
+                ],
+            },
+            {
+                "name": "Firewalls, Zero Trust & Cryptography",
+                "lessons": [
+                    {
+                        "title": "Next-generation firewall technologies",
+                        "description": "Understand how NGFWs go beyond port and protocol filtering with app awareness and threat prevention.",
+                    },
+                    {
+                        "title": "Zero Trust network access principles",
+                        "description": "Apply \"never trust, always verify\" to network access instead of trusting anything inside the perimeter.",
+                    },
+                    {
+                        "title": "Cryptography and encryption methods",
+                        "description": "Cover the core encryption concepts that protect data as it moves across the network.",
+                    },
+                ],
+            },
+        ],
+    },
+    {
         "id": "edr",
         "title": "Endpoint Detection & Response",
         "tagline": "Detect, investigate, and respond to threats on the endpoint.",
