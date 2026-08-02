@@ -1,7 +1,7 @@
 import os
 import sqlite3
 from functools import wraps
-from urllib.parse import urlparse
+from urllib.parse import urljoin, urlparse
 
 from flask import Flask, abort, flash, g, redirect, render_template, request, session, url_for
 from flask_wtf import CSRFProtect
@@ -131,13 +131,6 @@ def init_db():
 init_db()
 
 
-def is_safe_next_url(target):
-    if not target:
-        return False
-    parsed = urlparse(target)
-    return not parsed.scheme and not parsed.netloc and parsed.path.startswith("/")
-
-
 def login_required(view):
     @wraps(view)
     def wrapped(*args, **kwargs):
@@ -196,8 +189,10 @@ def login():
             session["user_id"] = user["id"]
             session["user_name"] = user["name"]
             flash(f"Welcome back, {user['name']}!", "success")
-            next_url = request.args.get("next")
-            if is_safe_next_url(next_url):
+            next_url = request.args.get("next", "")
+            site_url = urlparse(request.host_url)
+            redirect_url = urlparse(urljoin(request.host_url, next_url))
+            if redirect_url.scheme in ("http", "https") and redirect_url.netloc == site_url.netloc:
                 return redirect(next_url)
             return redirect(url_for("home"))
 
