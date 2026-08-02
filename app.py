@@ -69,30 +69,78 @@ COURSES = [
         "icon": "🛡️",
         "level": "Beginner",
         "progress": 60,
-        "lessons": [
+        "modules": [
             {
-                "title": "Log analysis and SIEM basics",
-                "description": "Read raw logs and use a SIEM to correlate events into signals worth investigating.",
+                "name": "Log Analysis & SIEM",
+                "lessons": [
+                    {
+                        "title": "Log analysis and SIEM basics",
+                        "description": "Read raw logs and use a SIEM to correlate events into signals worth investigating.",
+                    },
+                ],
             },
             {
-                "title": "Splunk basics",
-                "description": "Ingest logs into Splunk and use SPL to search, filter, and build simple alerts from the data.",
+                "name": "Splunk",
+                "lessons": [
+                    {
+                        "title": "Splunk fundamentals & architecture",
+                        "description": "See how forwarders, indexers, and search heads move data from input to indexing to search, with a tour of Splunk Web.",
+                    },
+                    {
+                        "title": "Getting data in (data ingestion)",
+                        "description": "Bring data into Splunk from files, monitored directories, and forwarders, and see how source types and indexes organize it.",
+                    },
+                    {
+                        "title": "Search fundamentals (SPL)",
+                        "description": "Write basic searches with keywords, Boolean operators, and the time range picker, and chain commands together with the pipe.",
+                    },
+                    {
+                        "title": "Core SPL commands",
+                        "description": "Shape and aggregate results with stats, chart, timechart, table, eval, and other everyday SPL commands.",
+                    },
+                    {
+                        "title": "Fields",
+                        "description": "Work with extracted and calculated fields, plus an intro to regex-based extraction, aliases, and lookups.",
+                    },
+                    {
+                        "title": "Knowledge objects",
+                        "description": "Save searches as reports and set up alerts that trigger on a schedule or in real time.",
+                    },
+                    {
+                        "title": "Dashboards & visualizations",
+                        "description": "Turn saved searches into dashboard panels and choose the right chart type for the data.",
+                    },
+                    {
+                        "title": "Basic administration",
+                        "description": "Get oriented on user roles and permissions, index management, and where Splunk's .conf files live.",
+                    },
+                ],
             },
             {
-                "title": "The incident response lifecycle",
-                "description": "Walk through preparation, detection, containment, eradication, and recovery for a security incident.",
+                "name": "Incident Response",
+                "lessons": [
+                    {
+                        "title": "The incident response lifecycle",
+                        "description": "Walk through preparation, detection, containment, eradication, and recovery for a security incident.",
+                    },
+                    {
+                        "title": "Threat hunting fundamentals",
+                        "description": "Proactively search for signs of compromise instead of waiting for an alert to fire.",
+                    },
+                ],
             },
             {
-                "title": "Threat hunting fundamentals",
-                "description": "Proactively search for signs of compromise instead of waiting for an alert to fire.",
-            },
-            {
-                "title": "Hardening and secure configuration",
-                "description": "Reduce attack surface by locking down default settings, services, and permissions.",
-            },
-            {
-                "title": "Detection engineering basics",
-                "description": "Write detection rules that catch real attacker behavior without drowning the team in noise.",
+                "name": "Hardening & Detection",
+                "lessons": [
+                    {
+                        "title": "Hardening and secure configuration",
+                        "description": "Reduce attack surface by locking down default settings, services, and permissions.",
+                    },
+                    {
+                        "title": "Detection engineering basics",
+                        "description": "Write detection rules that catch real attacker behavior without drowning the team in noise.",
+                    },
+                ],
             },
         ],
     },
