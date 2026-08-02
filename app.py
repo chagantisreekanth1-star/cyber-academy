@@ -74,8 +74,36 @@ COURSES = [
                 "name": "Log Analysis & SIEM",
                 "lessons": [
                     {
-                        "title": "Log analysis and SIEM basics",
-                        "description": "Read raw logs and use a SIEM to correlate events into signals worth investigating.",
+                        "title": "What logs are",
+                        "description": "Understand what a log entry is — a timestamped record with a severity, source, and message — and where different systems write them.",
+                    },
+                    {
+                        "title": "Common types of logs",
+                        "description": "Tell system, application, security, network, and audit logs apart, and know where each one lives on Linux and Windows.",
+                    },
+                    {
+                        "title": "Why analyze logs",
+                        "description": "See the four main reasons to analyze logs: troubleshooting, security monitoring, performance monitoring, and compliance.",
+                    },
+                    {
+                        "title": "The log analysis process",
+                        "description": "Collect, normalize, parse, and correlate logs from multiple sources to turn scattered entries into a coherent picture.",
+                    },
+                    {
+                        "title": "Log severity levels",
+                        "description": "Use DEBUG through CRITICAL severity levels to filter out routine noise and focus on real problems.",
+                    },
+                    {
+                        "title": "Common tools",
+                        "description": "Get comfortable with grep, awk, sed, and tail -f for quick digging, and know when a SIEM like the ELK Stack, Splunk, or Sentinel is the better tool.",
+                    },
+                    {
+                        "title": "Key techniques",
+                        "description": "Apply filtering, pattern recognition, anomaly detection, correlation, and visualization to make logs tell a story.",
+                    },
+                    {
+                        "title": "Worked example: finding brute-force logins",
+                        "description": "Use grep on /var/log/auth.log to pull failed SSH attempts and spot a brute-force attack by counting attempts per IP.",
                     },
                 ],
             },
